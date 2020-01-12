@@ -38,7 +38,7 @@ else
     git pull
 
     log "Running install script"
-    bash "$HOME/.RVxLab/ubuntu-setup/run.sh"
+    bash "$HOME/.RVxLab/ubuntu-setup/run.sh -f"
 
     log "Done!"
 fi

@@ -12,7 +12,7 @@ To install, run this:
 Using wget:
 
 ```
-wget -O- https://raw.githubusercontent.com/RVxLab/ubuntu-setup/master/install.sh | bash
+wget -qO- https://raw.githubusercontent.com/RVxLab/ubuntu-setup/master/install.sh | bash
 ```
 
 Using curl

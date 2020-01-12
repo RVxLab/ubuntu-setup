@@ -10,7 +10,7 @@ PREV_DIR=$(pwd)
 REPO="https://github.com/RVxLab/ubuntu-setup.git"
 
 log "Installing dependencies: zsh, git"
-sudo apt-get update
+sudo apt-get update -qq
 sudo apt-get install -yqq zsh git
 
 log "Installing SpaceVim"

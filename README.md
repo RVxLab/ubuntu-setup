@@ -21,10 +21,6 @@ Using curl
 curl -s -o- https://raw.githubusercontent.com/RVxLab/ubuntu-setup/master/install.sh | bash
 ```
 
-Once installed, you potentially don't want to run this again.
-
-Running the install script a second time will overwrite any changes you made.
-
 ## Updating
 
 To update, simply go to `$HOME/.RVxLab/ubuntu-setup` and `git pull`, then run `run.sh`

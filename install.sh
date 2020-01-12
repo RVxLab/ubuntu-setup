@@ -9,9 +9,9 @@ function log {
 PREV_DIR=$(pwd)
 REPO="https://github.com/RVxLab/ubuntu-setup.git"
 
-log "Installing dependencies: zsh, git"
+log "Installing dependencies: zsh, git, vim"
 sudo apt-get update -qq
-sudo apt-get install -yqq zsh git
+sudo apt-get install -yqq zsh git vim
 
 log "Installing SpaceVim"
 curl -sLf https://spacevim.org/install.sh | bash

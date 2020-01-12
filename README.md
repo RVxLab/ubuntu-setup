@@ -7,6 +7,12 @@
 
 ## Installation
 
+Ensure you have the following installed:
+
+ - zsh
+ - vim
+ - git
+
 To install, run this:
 
 Using wget:

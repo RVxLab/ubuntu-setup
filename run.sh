@@ -6,6 +6,11 @@ function copyFile {
     local SOURCE=$1
     local DESTINATION=$2
 
+    if [[ ! -d "$(dirname "$DESTINATION")" ]]
+    then
+        mkdir -p "$(dirname "$DESTINATION")"
+    fi
+
     if [[ -f "$DESTINATION" ]]
     then
         cp "$DESTINATION" "$DESTINATION.bak"

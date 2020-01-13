@@ -18,6 +18,11 @@ fi
 log "Installing SpaceVim"
 curl -sLf https://spacevim.org/install.sh | bash
 
+log "Installing Oh My Zsh"
+wget -qO ./install.sh https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh && \
+    bash ./install.sh --unattended && \
+    rm ./install.sh
+
 if [[ ! -d "$HOME/.RVxLab" ]]
 then
     log "Creating .RVxLab directory in $HOME"

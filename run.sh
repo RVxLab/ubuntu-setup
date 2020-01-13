@@ -1,63 +1,29 @@
 #!/bin/bash
 
-function prompt {
-    local QUESTION=$1
-
-    while true
-    do
-        printf "$QUESTION > [N/y]: "
-        read CONFIRM
-
-        if [[ $CONFIRM == "y" || $CONFIRM == "Y" ]]
-        then
-            return 0
-        elif [[ $CONFIRM == "n" || $CONFIRM == "N" || -z $CONFIRM ]]
-        then
-            return 1
-        fi
-    done
-}
+set -e
 
 function copyFile {
     local SOURCE=$1
     local DESTINATION=$2
 
+    if [[ -f "$DESTINATION" ]]
+    then
+        cp "$DESTINATION" "$DESTINATION.bak"
+        echo "Backed up $DESTINATION to $DESTINATION.bak"
+    fi
+
     cp "$SOURCE" "$DESTINATION"
 }
 
-FORCE=0
-
-while getopts "f" OPT
-do
-    case "$OPT" in
-        f)
-            FORCE=1
-            ;;
-    esac
-done
-
+PWD=$(dirname "$0")
 DESTINATION_DIR="$HOME"
+FILES_DIR="$PWD/files"
 
-for FILE in $(find files -type f)
+while IFS= read -r -d '' FILE
 do
-    CUT_FILE="$(echo $FILE | cut -b 7-)"
-    DESTINATION_FILE="$DESTINATION_DIR/$CUT_FILE"
+    FILE_TO_COPY=$(sed "s@$PWD/files/@@" <<< "$FILE")
+    DESTINATION_FILE="$DESTINATION_DIR/$FILE_TO_COPY"
 
-    if [[ ! -f $DESTINATION_FILE ]]
-    then
-        echo "Creating $CUT_FILE"
-        copyFile "$FILE" "$DESTINATION_FILE"
-    else
-        if [[ $FORCE -eq 1 ]]
-        then
-            echo "Overwriting $CUT_FILE"
-            copyFile "$FILE" "$DESTINATION_FILE"
-        elif prompt "$CUT_FILE already exists in $DESTINATION_DIR, overwrite?"
-        then
-            echo "Overwriting $CUT_FILE"
-            copyFile "$FILE" "$DESTINATION_FILE"
-        else
-            echo "Skipping $CUT_FILE"
-        fi
-    fi
-done
+    copyFile "$FILE" "$DESTINATION_FILE"
+    echo "Copied $FILE to $DESTINATION_FILE"
+done < <(find "$FILES_DIR" -type f -print0)

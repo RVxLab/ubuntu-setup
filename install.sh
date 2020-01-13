@@ -6,10 +6,10 @@ function log {
     echo "[+] $1"
 }
 
-PREV_DIR=$(pwd)
 REPO="https://github.com/RVxLab/ubuntu-setup.git"
+CLONE_DIR="$HOME/.RVxLab/ubuntu-setup"
 
-if ! (which git && which zsh && which vim)
+if ! (which git && which zsh && which vim) > /dev/null
 then
     echo "Please ensure git, zsh and vim are installed"
     exit 1
@@ -24,15 +24,12 @@ then
     mkdir -p "$HOME/.RVxLab"
 fi
 
-log "Changing directory to $HOME/.RVxLab"
-cd $HOME/.RVxLab
-
 if [[ ! -d "$HOME/.RVxLab/ubuntu-setup" ]]
 then
-    git clone "$REPO"
+    git clone "$REPO" "$CLONE_DIR"
 
     log "Running install script"
-    bash "$HOME/.RVxLab/ubuntu-setup/run.sh"
+    bash -xe "$HOME/.RVxLab/ubuntu-setup/run.sh"
 
     log "Done! To start using this, please change your shell to zsh"
 else
@@ -40,7 +37,7 @@ else
     git pull
 
     log "Running install script"
-    bash "$HOME/.RVxLab/ubuntu-setup/run.sh"
+    bash -xe "$HOME/.RVxLab/ubuntu-setup/run.sh"
 
     log "Done!"
 fi

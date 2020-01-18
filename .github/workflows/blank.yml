@@ -1,0 +1,24 @@
+name: Test works
+
+on: [push]
+
+jobs:
+    build:
+        runs-on: ubuntu-18.04
+        steps:
+            - uses: actions/checkout@v1
+            - name: Update apt repo
+              run: apt-get update -yqq
+            - name: Install needed stuff to run tests
+              run: apt-get install -yqq lsb-release sudo
+            - name: Set up test user
+              run: |
+                  useradd -s /bin/bash -G sudo testuser
+                  mkdir /home/testuser
+                  chown -R testuser:testuser /home/testuser
+                  echo "testuser ALL=(ALL) NOPASSWD:ALL" | tee -a /etc/sudoers
+            - name: Switch to test user
+              run: su - testuser
+            - name: Run the install script
+              run: wget -qO- https://raw.githubusercontent.com/RVxLab/ubuntu-setup/master/install.sh | bash -s - --with-docker --with-nvm --with-davfs
+      

@@ -102,7 +102,10 @@ function installNvm {
 
 # Install oh my zsh
 function installOhMyZsh {
-    curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash -s - --unattended
+    if [[ ! -d "$HOME/.oh-my-zsh" ]]
+    then
+        curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash -s - --unattended
+    fi
 }
 
 # Get .zshrc contents
@@ -168,7 +171,7 @@ function getProgress {
 
 # Change shell to zsh
 function setShellZsh {
-    chsh -s "$(command -v zsh)"
+    sudo chsh -s "$(command -v zsh)" "$USER"
 }
 
 # Set .zshrc
@@ -184,7 +187,8 @@ function installPrerequisites {
 
 # Install packages
 function installPackages {
-    sudo apt-get install -yqq "$(getPackagesList)"
+    # shellcheck disable=SC2046
+    sudo apt-get install -yqq $(getPackagesList)
 }
 
 # Prompt sign out

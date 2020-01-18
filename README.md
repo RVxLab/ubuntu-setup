@@ -1,43 +1,32 @@
 # My Ubuntu (and derivatives) setup
 
+This is a script that sets up my Linux environments as I like it.
+
+## Disclaimer
+
+**Warning, this script overwrites your existing .zshrc file and adds groups to your current user.**
+
+**This should only be ran on a fresh install.**
+
 ## Software:
 
  - zsh + [Oh My Zsh](https://github.com/ohmyzsh/ohmyzsh)
- - vim + [SpaceVim](https://spacevim.org)
+ - vim
+ - keepassxc
+ - docker (using --with-docker)
+ - nvm (using --with-nvm)
+ - davfs2 (using --with-davfs)
 
 ## Installation
 
-Ensure you have the following installed:
-
- - zsh
- - vim
- - git
-
-To install, run this:
-
-Using wget:
+To install:
 
 ```
 wget -qO- https://raw.githubusercontent.com/RVxLab/ubuntu-setup/master/install.sh | bash
 ```
 
-Using curl
+You can add flags by slightly changing the bash command at the end:
 
 ```
-curl -s -o- https://raw.githubusercontent.com/RVxLab/ubuntu-setup/master/install.sh | bash
+wget -qO- https://raw.githubusercontent.com/RVxLab/ubuntu-setup/master/install.sh | bash -s - --with-docker --with-nvm --with-davfs
 ```
-
-## Updating
-
-To update, simply go to `$HOME/.RVxLab/ubuntu-setup` and `git pull`, then run `run.sh`
-
-## run.sh
-
-`run.sh` is the main script.
-
-```
-run.sh
-    -f  Force installation
-```
-
-If a file already exists, you'll be asked to overwrite it unless the `-f` flag is set.

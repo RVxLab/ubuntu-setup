@@ -1,0 +1,19 @@
+FROM debian:buster
+
+ENV USER=testuser
+
+COPY install.sh /
+
+RUN apt-get update -yqq
+RUN apt-get install -yqq lsb-release sudo
+
+RUN useradd -s /bin/bash -G sudo testuser
+RUN mkdir /home/testuser
+RUN chown -R testuser:testuser /home/testuser
+
+RUN echo "testuser ALL=(ALL) NOPASSWD:ALL" | tee -a /etc/sudoers
+
+USER testuser
+WORKDIR /home/testuser
+
+RUN cat /install.sh | bash -s - --with-nvm --with-docker --with-davfs2

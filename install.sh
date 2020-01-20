@@ -7,11 +7,16 @@ IS_MINT=0
 INSTALL_DOCKER=0
 INSTALL_NVM=0
 INSTALL_DAVFS=0
+INSTALL_KEEPASSXC=0
 SHOULD_SIGN_OUT=0
 
 while (( "$#" ))
 do
     case "$1" in
+        -r|--restart)
+            rm "$PROGRESS_FILE"
+            shift
+            ;;
         --with-docker)
             INSTALL_DOCKER=0
             shift
@@ -22,6 +27,10 @@ do
             ;;
         --with-davfs)
             INSTALL_DAVFS=0
+            shift
+            ;;
+        --with-keepassxc)
+            INSTALL_KEEPASSXC=1
             shift
             ;;
         *)
@@ -60,6 +69,22 @@ function getPackagesList {
     echo "${PACKAGES[*]}"
 }
 
+# Install extra packages
+function installExtraPackages {
+    local PACKAGES=()
+
+    if [[ $INSTALL_KEEPASSXC -eq 1 ]]
+    then
+        sudo add-apt-repository -y ppa:phoerious/keepassxc
+        PACKAGES+=("keepassxc")
+    fi
+
+    sudo apt-get update -yqq
+
+    # shellcheck disable=SC2086
+    sudo apt-get install -yqq ${PACKAGES[*]}
+}
+
 # Get Ubuntu/Debian distro version
 function getDistro {
     lsb_release -cs
@@ -91,7 +116,7 @@ function installDockerPPA {
         DISTRO=$(getDistro)
     fi
 
-    sudo add-apt-repository -yqq "deb [arch=amd64] https://download.docker.com/linux/ubuntu $DISTRO stable"
+    sudo add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/ubuntu $DISTRO stable"
     sudo apt-get -yqq update
 }
 
@@ -222,6 +247,7 @@ CURRENT_PROGRESS=$(getProgress)
 # 5 = Set up user groups
 # 6 = Install oh my zsh
 # 7 = Install nvm
+# 8 = Install extra software (such as keepassxc and the like)
 
 # Kick off
 if [[ $CURRENT_PROGRESS -eq 0 ]]
@@ -290,9 +316,19 @@ if [[ $INSTALL_NVM -eq 1 && $CURRENT_PROGRESS -eq 7 ]]
 then
     log "Installing nvm"
     installNvm
-    setProgress 8
 fi
 
+setProgress 8
+
+# Set up extra software
+if [[ $CURRENT_PROGRESS -eq 8 ]]
+then
+    log "Installing extra's if needed"
+    installExtraPackages
+    setProgress 9
+fi
+
+# Exit message
 if [[ $SHOULD_SIGN_OUT -eq 1 ]]
 then
     log "Done! To finish, please sign out and back in"

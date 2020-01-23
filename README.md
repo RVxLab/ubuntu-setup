@@ -12,7 +12,7 @@ This is a script that sets up my Linux environments as I like it.
 
  - zsh + [Oh My Zsh](https://github.com/ohmyzsh/ohmyzsh)
  - vim
- - keepassxc
+ - keepassxc (using --with-keepassxc)
  - docker (using --with-docker)
  - nvm (using --with-nvm)
  - davfs2 (using --with-davfs)
@@ -29,6 +29,25 @@ You can add flags by slightly changing the bash command at the end:
 
 ```
 wget -qO- https://raw.githubusercontent.com/RVxLab/ubuntu-setup/master/install.sh | bash -s - --with-docker --with-nvm --with-davfs
+```
+
+### Options
+
+```
+-r|--restart
+Restarts the installation by removing /var/tmp/.ubuntu-setup-progress
+
+--with-docker
+Installs the Docker, also adds your user to the docker group
+
+--with-nvm
+Install nvm
+
+--with-davfs
+Install davfs2, also adds your user to the davfs group
+
+--with-keepassxc
+Install the latest version of KeepassXC
 ```
 
 ## Tests

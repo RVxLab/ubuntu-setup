@@ -54,7 +54,7 @@ function log {
 
 # Get packages to install with apt
 function getPackagesList {
-    local PACKAGES=("vim" "zsh" "git")
+    local PACKAGES=("neovim" "zsh" "git")
 
     if [[ $INSTALL_DOCKER -eq 1 ]]
     then
@@ -170,6 +170,74 @@ EOF
     echo "$ZSHRC"
 }
 
+# Get vimrc contents
+function getVimrc {
+    local VIMRC
+    VIMRC=$(cat <<EOF
+"" PLUGINS
+filetype indent plugin on
+
+"" CONFIG
+
+" Show line numbers
+set number	                
+
+" Break lines at word (requires Wrap lines)
+set linebreak	                
+
+" Wrap-broken line prefix
+set showbreak=+++ 	        
+
+" Line wrap (number of cols)
+set textwidth=100	        
+
+" Highlight matching brace
+set showmatch	                
+
+" Use visual bell (no beeping)
+set visualbell	                
+
+" Highlight all search results
+set hlsearch	                
+
+" Enable smart-case search
+set smartcase	                
+
+" Always case-insensitive
+set ignorecase	                
+
+" Searches for strings incrementally
+set incsearch	                
+
+" Auto-indent new lines
+set autoindent	                
+
+" Use spaces instead of tabs
+set expandtab	                
+
+" Number of auto-indent spaces
+set shiftwidth=4	        
+
+" Number of spaces per Tab
+set softtabstop=4	        
+
+" Show row and column ruler information
+set ruler	                
+
+" Number of undo levels
+set undolevels=1000	        
+
+" Backspace behaviour
+set backspace=indent,eol,start	
+
+" Enable syntax highlighting
+set syntax=on                   
+EOF
+)
+
+    echo "$VIMRC"
+}
+
 # Set progress
 function setProgress {
     CURRENT_PROGRESS=$1
@@ -202,6 +270,14 @@ function setShellZsh {
 # Set .zshrc
 function setZshrc {
     getZshrc > "$HOME/.zshrc"
+}
+
+# set .vimrc/init.vim
+function setVimrc {
+    getVimrc > "$HOME/.vimrc"
+
+    mkdir -p "$HOME/.config/nvim"
+    ln -s "$HOME/.vimrc" "$HOME/.config/nvim/init.vim"
 }
 
 # Install prerequisites

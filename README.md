@@ -11,7 +11,7 @@ This is a script that sets up my Linux environments as I like it.
 ## Software:
 
  - zsh + [Oh My Zsh](https://github.com/ohmyzsh/ohmyzsh)
- - vim
+ - neovim
  - keepassxc (using --with-keepassxc)
  - docker (using --with-docker)
  - nvm (using --with-nvm)
@@ -38,7 +38,7 @@ wget -qO- https://raw.githubusercontent.com/RVxLab/ubuntu-setup/master/install.s
 Restarts the installation by removing /var/tmp/.ubuntu-setup-progress
 
 --with-docker
-Installs the Docker, also adds your user to the docker group
+Install Docker, also adds your user to the docker group
 
 --with-nvm
 Install nvm

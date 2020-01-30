@@ -16,4 +16,4 @@ RUN echo "testuser ALL=(ALL) NOPASSWD:ALL" | tee -a /etc/sudoers
 USER testuser
 WORKDIR /home/testuser
 
-RUN cat /install.sh | bash -s - --with-nvm --with-docker --with-davfs2
+RUN cat /install.sh | bash -xs - --with-nvm --with-docker --with-davfs2 --with-fonts --with-jetbrains-toolbox --with-keepassxc

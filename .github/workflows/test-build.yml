@@ -14,11 +14,11 @@ jobs:
             - name: Set up test user
               run: |
                   sudo useradd -s /bin/bash -G sudo testuser
-                  sudo  mkdir /home/testuser
+                  sudo mkdir /home/testuser
                   sudo chown -R testuser:testuser /home/testuser
                   echo "testuser ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
             - name: Switch to test user
               run: sudo su - testuser
             - name: Run the install script
-              run: wget -qO- https://raw.githubusercontent.com/RVxLab/ubuntu-setup/master/install.sh | bash -s - --with-docker --with-nvm --with-davfs
+              run: wget -qO- https://raw.githubusercontent.com/RVxLab/ubuntu-setup/master/install.sh | bash -s - --with-nvm --with-docker --with-davfs2 --with-fonts --with-jetbrains-toolbox --with-keepassxc
       

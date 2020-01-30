@@ -2,12 +2,19 @@
 
 set -e
 
+# Files and locations
 PROGRESS_FILE="/var/tmp/.ubuntu-setup-progress"
+JETBRAINS_TOOLBOX_LOCATION="$HOME/jetbrains"
+FONTS_LOCATION="$HOME/.fonts"
+
+# Flags
 IS_MINT=0
 INSTALL_DOCKER=0
 INSTALL_NVM=0
 INSTALL_DAVFS=0
 INSTALL_KEEPASSXC=0
+INSTALL_FONTS=0
+INSTALL_JETBRAINS_TOOLBOX=0
 SHOULD_SIGN_OUT=0
 
 while (( "$#" ))
@@ -31,6 +38,14 @@ do
             ;;
         --with-keepassxc)
             INSTALL_KEEPASSXC=1
+            shift
+            ;;
+        --with-fonts)
+            INSTALL_FONTS=1
+            shift
+            ;;
+        --with-jetbrains-toolbox)
+            INSTALL_JETBRAINS_TOOLBOX=1
             shift
             ;;
         *)
@@ -66,23 +81,17 @@ function getPackagesList {
         PACKAGES+=("davfs2")
     fi
 
-    echo "${PACKAGES[*]}"
-}
-
-# Install extra packages
-function installExtraPackages {
-    local PACKAGES=()
-
-    if [[ $INSTALL_KEEPASSXC -eq 1 ]]
+    if [[ $INSTALL_KEEPASSXC ]]
     then
-        sudo add-apt-repository -y ppa:phoerious/keepassxc
         PACKAGES+=("keepassxc")
     fi
 
-    sudo apt-get update -yqq
+    echo "${PACKAGES[*]}"
+}
 
-    # shellcheck disable=SC2086
-    sudo apt-get install -yqq ${PACKAGES[*]}
+# Install KeepassXC PPA
+function installKeepassXCPPA {
+    sudo add-apt-repository -y ppa:phoerious/keepassxc
 }
 
 # Get Ubuntu/Debian distro version
@@ -283,7 +292,7 @@ function setVimrc {
 # Install prerequisites
 function installPrerequisites {
     sudo apt-get -yqq update
-    sudo apt-get -yqq install apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+    sudo apt-get -yqq install apt-transport-https ca-certificates curl gnupg-agent software-properties-common wget tar jq
 }
 
 # Install packages
@@ -311,6 +320,61 @@ function setupUserGroup {
     fi
 }
 
+# Install Jetbrains Toolbox
+function installJetbrainsToolbox {
+    TOOLBOX_TAR_FILE="$JETBRAINS_TOOLBOX_LOCATION/toolbox.tgz"
+
+    mkdir -p "$JETBRAINS_TOOLBOX_LOCATION"
+    wget -qO "$TOOLBOX_TAR_FILE" 'https://data.services.jetbrains.com/products/download?platform=linux&code=TBA'
+    tar -C "$JETBRAINS_TOOLBOX_LOCATION" -xzf "$TOOLBOX_TAR_FILE"
+    rm "$TOOLBOX_TAR_FILE"
+}
+
+# Install fonts
+function installFonts {
+    mkdir -p "$FONTS_LOCATION"
+    wget -qO- https://api.github.com/repos/microsoft/cascadia-code/releases | jq -r '.[0].assets[] | select(.name == "Cascadia.ttf" or .name == "CascadiaPL.ttf") | .browser_download_url' | xargs wget -qP "$FONTS_LOCATION"
+}
+
+# Test if everything is in order
+function ensureSuccess {
+    if [[ $INSTALL_DOCKER -eq 1 ]]
+    then
+        command -v docker
+    fi
+
+    if [[ $INSTALL_NVM -eq 1 ]]
+    then
+        stat "$HOME/.nvm"
+    fi
+
+    if [[ $INSTALL_DAVFS -eq 1 ]]
+    then
+        command -v mount.davfs
+    fi
+
+    if [[ $INSTALL_KEEPASSXC -eq 1 ]]
+    then
+        command -v keepassxc
+    fi
+
+    if [[ $INSTALL_FONTS -eq 1 ]]
+    then
+        stat "$HOME/.fonts"
+    fi
+
+    if [[ $INSTALL_JETBRAINS_TOOLBOX -eq 1 ]]
+    then
+        EXPECTED_NAME="jetbrains-toolbox"
+        ACTUAL_NAME=$(find "$JETBRAINS_TOOLBOX_LOCATION" -type f -exec basename {} \;)
+
+        if [[ "$EXPECTED_NAME" != "$ACTUAL_NAME" ]]
+        then
+            echo "Failed to assert that Jetbrains Toolbox was installed properly in $JETBRAINS_TOOLBOX_LOCATION" 1>&2
+        fi
+    fi
+}
+
 CURRENT_PROGRESS=$(getProgress)
 
 # Let's roll!
@@ -318,12 +382,14 @@ CURRENT_PROGRESS=$(getProgress)
 # 0 = Fresh run
 # 1 = Prerequisites installed
 # 2 = Docker PPA
-# 3 = Install packages
-# 4 = Change shell to zsh
-# 5 = Set up user groups
-# 6 = Install oh my zsh
-# 7 = Install nvm
-# 8 = Install extra software (such as keepassxc and the like)
+# 3 = KeepassXC PPA
+# 4 = Install packages
+# 5 = Change shell to zsh
+# 6 = Set up user groups
+# 7 = Install oh my zsh
+# 8 = Install nvm
+# 9 = Install fonts
+# 10 = Install Jetbrains Toolbox
 
 # Kick off
 if [[ $CURRENT_PROGRESS -eq 0 ]]
@@ -352,57 +418,92 @@ then
     setProgress 3
 fi
 
-# Install all packages
+# Install the KeepassXC PPA
 if [[ $CURRENT_PROGRESS -eq 3 ]]
 then
-    log "Installing packages"
-    installPackages
+    if [[ $INSTALL_KEEPASSXC ]]
+    then
+        log "Adding KeepassXC PPA"
+        installKeepassXCPPA
+    fi
+
     setProgress 4
 fi
 
-# Set shell to zsh
+# Install all packages
 if [[ $CURRENT_PROGRESS -eq 4 ]]
+then
+    log "Installing packages"
+    installPackages
+    setProgress 5
+fi
+
+# Set shell to zsh
+if [[ $CURRENT_PROGRESS -eq 5 ]]
 then
     log "Setting shell to zsh"
     setShellZsh
     setShouldSignOut
-    setProgress 5
+    setProgress 6
 fi
 
 # Set up user groups
-if [[ $CURRENT_PROGRESS -eq 5 ]]
+if [[ $CURRENT_PROGRESS -eq 6 ]]
 then
     log "Setting up user groups"
     setupUserGroup
     setShouldSignOut
-    setProgress 6
+    setProgress 7
 fi
 
 # Set up ohmyzsh
-if [[ $CURRENT_PROGRESS -eq 6 ]]
+if [[ $CURRENT_PROGRESS -eq 7 ]]
 then
     log "Installing oh my zsh"
     installOhMyZsh
     setZshrc
-    setProgress 7
+    setProgress 8
 fi
 
 # Set up nvm
-if [[ $INSTALL_NVM -eq 1 && $CURRENT_PROGRESS -eq 7 ]]
-then
-    log "Installing nvm"
-    installNvm
-fi
-
-setProgress 8
-
-# Set up extra software
 if [[ $CURRENT_PROGRESS -eq 8 ]]
 then
-    log "Installing extra's if needed"
-    installExtraPackages
+    if [[ $INSTALL_NVM -eq 1 ]]
+    then
+        log "Installing nvm"
+        installNvm
+    fi
+
     setProgress 9
 fi
+
+# Add fonts
+if [[ $CURRENT_PROGRESS -eq 9 ]]
+then
+    if [[ $INSTALL_FONTS -eq 1 ]]
+    then
+        log "Installing fonts"
+        installFonts
+    fi
+
+    setProgress 10
+fi
+
+# Set up extra software
+if [[ $CURRENT_PROGRESS -eq 10 ]]
+then
+    if [[ $INSTALL_JETBRAINS_TOOLBOX -eq 1 ]]
+    then
+        log "Installing Jetbrains Toolbox"
+        installJetbrainsToolbox
+    fi
+
+    setProgress 11
+fi
+
+# Test if everything is good
+log "Testing if everything is done properly"
+ensureSuccess
 
 # Exit message
 if [[ $SHOULD_SIGN_OUT -eq 1 ]]

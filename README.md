@@ -16,6 +16,8 @@ This is a script that sets up my Linux environments as I like it.
  - docker (using --with-docker)
  - nvm (using --with-nvm)
  - davfs2 (using --with-davfs)
+ - Cascadia Code (and PL version) (using --with-fonts)
+ - Jetbrains Toolbox (using --with-jetbrains-toolbox)
 
 ## Installation
 
@@ -48,6 +50,12 @@ Install davfs2, also adds your user to the davfs group
 
 --with-keepassxc
 Install the latest version of KeepassXC
+
+--with-fonts
+Install Cascadia Code and Cascadia Code PL
+
+--with-jetbrains-toolbox
+Install Jetbrains Toolbox into "$HOME/jetbrains"
 ```
 
 ## Tests

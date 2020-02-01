@@ -156,7 +156,6 @@ function getZshrc {
     ZSHRC=$(cat <<EOF
 ZSH_THEME="agnoster"
 HIST_STAMPS="yyyy-mm-dd"
-ZSH_CUSTOM="\$HOME/scripts"
 
 plugins=(${ZSH_PLUGINS[*]})
 

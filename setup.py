@@ -2,31 +2,6 @@ import subprocess
 from typing import List, Dict, Tuple
 from argparse import ArgumentParser
 import csv
-from urllib import request
-
-
-class Apt:
-    def run_command(self, command: str):
-        subprocess.run(command, shell=True)
-
-    def install_packages(self, packages: List[str]):
-        command = 'sudo apt-get install -yqq {}'.format(' '.join(packages))
-
-        self.run_command(command)
-
-    def add_repo(self, repo: str):
-        command = 'sudo add-apt-repository -y {}'.format(repo)
-
-        self.run_command(command)
-
-    def update(self):
-        self.run_command('sudo apt-get update')
-
-    def upgrade(self):
-        self.run_command('sudo apt-get dist-upgrade -y')
-
-    def add_key(self, key: str):
-        self.run_command('sudo apt-key add {}'.format(key))
 
 
 class Source:
@@ -49,9 +24,43 @@ class AptPackage(Source):
 
 
 class AptRepository:
-    def __init__(self, repo: str, gpg_key: str = None):
+    def __init__(self, repo: str, gpg_key_location: str = None):
         self.repo = repo
-        self.gpg_key = gpg_key
+        self.gpg_key_location = gpg_key_location
+
+
+class Apt:
+    def __init__(self, args):
+        self.args = args
+
+    @property
+    def verbose_flags(self) -> str:
+        if self.args.verbose:
+            return '-y'
+
+        return '-yqq'
+
+    def run_command(self, command: str):
+        subprocess.run(command, shell=True)
+
+    def install(self, packages: List[AptPackage]):
+        command = 'sudo apt-get install {} {}'.format(self.verbose_flags, ' '.join(list(map(lambda package: package.get(), packages))))
+
+        self.run_command(command)
+
+    def add_repo(self, repo: str):
+        command = 'sudo add-apt-repository -y "{}"'.format(repo)
+
+        self.run_command(command)
+
+    def update(self):
+        self.run_command('sudo apt-get update')
+
+    def upgrade(self):
+        self.run_command('sudo apt-get dist-upgrade {}'.format(self.verbose_flags))
+
+    def add_key(self, key_location: str):
+        self.run_command('curl -fsSL {} | sudo apt-key add -'.format(key_location))
 
 
 def dict_to_apt_packages(dictionary: Dict) -> List[AptPackage]:
@@ -66,10 +75,7 @@ def get_repos(args) -> List[AptRepository]:
     repos = []
 
     if args.with_docker:
-        docker_gpg_res = request.urlopen('https://download.docker.com/linux/ubuntu/gpg')
-        docker_gpg = docker_gpg_res.read().decode('UTF-8')
-
-        repos.append(AptRepository(get_docker_apt_repo(), docker_gpg))
+        repos.append(AptRepository(get_docker_apt_repo(), 'https://download.docker.com/linux/ubuntu/gpg'))
 
     return repos
 
@@ -106,6 +112,7 @@ def get_docker_apt_repo() -> str:
 
 def get_args():
     parser = ArgumentParser(description='Installation script for Debian based distros')
+    parser.add_argument('-v', '--verbose', nargs='?', const=True, default=False, help='Whether to output more stuff')
     parser.add_argument('--with-docker', nargs='?', const=True, default=False, help='Whether to install docker-ce')
 
     return parser.parse_args()
@@ -125,15 +132,19 @@ def get_distro() -> Tuple:
 
 def main():
     args = get_args()
+    apt = Apt(args)
+    apt.update()
+
+    apt.install(get_prerequisite_packages(args))
+
     repos = get_repos(args)
 
-    apt = Apt()
-
     for repo in repos:
-        apt.add_key(repo.gpg_key)
-        apt.add_key(repo.repo)
+        apt.add_key(repo.gpg_key_location)
+        apt.add_repo(repo.repo)
 
     apt.update()
+    apt.install(get_packages(args))
 
 
 if __name__ == '__main__':

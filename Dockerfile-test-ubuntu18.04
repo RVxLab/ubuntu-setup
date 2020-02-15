@@ -2,10 +2,10 @@ FROM ubuntu:bionic
 
 ENV USER=testuser
 
-COPY install.sh /
+COPY setup.py /
 
 RUN apt-get update -yqq
-RUN apt-get install -yqq lsb-release sudo
+RUN apt-get install -yqq lsb-release sudo ca-certificates gnupg
 
 RUN useradd -s /bin/bash -G sudo testuser
 RUN mkdir /home/testuser
@@ -16,4 +16,4 @@ RUN echo "testuser ALL=(ALL) NOPASSWD:ALL" | tee -a /etc/sudoers
 USER testuser
 WORKDIR /home/testuser
 
-RUN cat /install.sh | bash -xs - --with-nvm --with-docker --with-davfs2 --with-fonts --with-jetbrains-toolbox --with-keepassxc
+RUN cat /setup.py | python3 - --with-docker

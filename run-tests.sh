@@ -9,4 +9,4 @@ then
 fi
 
 docker build --no-cache -f "./Dockerfile-test-ubuntu18.04" .
-docker build --no-cache -f "./Dockerfile-test-debian-buster" .
+#docker build --no-cache -f "./Dockerfile-test-debian-buster" .

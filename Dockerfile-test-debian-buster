@@ -16,4 +16,4 @@ RUN echo "testuser ALL=(ALL) NOPASSWD:ALL" | tee -a /etc/sudoers
 USER testuser
 WORKDIR /home/testuser
 
-RUN cat /setup.py | python3 - --with-docker
+RUN cat /setup.py | python3 - --docker --nvm --jetbrains --davfs --keepassxc --overwrite-zsh --micro

@@ -93,6 +93,9 @@ def get_repos(args) -> List[AptRepository]:
     if args.docker:
         repos.append(AptRepository(get_docker_apt_repo(), 'https://download.docker.com/linux/ubuntu/gpg'))
 
+    if args.keepassxc:
+        repos.append(AptRepository('ppa:phoerious/keepassxc'))
+
     return repos
 
 
@@ -115,6 +118,8 @@ def get_packages(args) -> List[AptPackage]:
         'docker-ce': args.docker,
         'docker-ce-cli': args.docker,
         'containerd.io': args.docker,
+        'keepassxc': args.keepassxc,
+        'davfs2': False,
     }
 
     return parse_dict_to_list(packages, lambda package: AptPackage(package))
@@ -133,6 +138,10 @@ def get_args():
     parser.add_argument('--nvm', nargs='?', const=True, default=False, help='Whether to install nvm')
     parser.add_argument('--zsh-theme', nargs='?', default='simple', help='Which zsh theme to use')
     parser.add_argument('--overwrite-zsh', nargs='?', const=True, default=False, help='Whether to overwrite the .zshrc file')
+    parser.add_argument('--micro', nargs='?', const=True, default=False, help='Whether to install micro')
+    parser.add_argument('--jetbrains', nargs='?', const=True, default=False, help='Whether to install Jetbrains Toolbox')
+    parser.add_argument('--keepassxc', nargs='?', const=True, default=False, help='Whether to install KeepassXC')
+    parser.add_argument('--davfs', nargs='?', const=True, default=False, help='Whether to install davfs2')
 
     return parser.parse_args()
 
@@ -153,14 +162,20 @@ def change_shell():
     CommandRunner.run('sudo chsh -s "$(command -v zsh)" "$USER"')
 
 
-def add_groups(args):
+def add_groups(args) -> bool:
     groups = parse_dict_to_list({
-        'docker': args.docker
+        'docker': args.docker,
+        'davfs2': False,
     }, lambda group: group)
+
+    if len(groups) == 0:
+        return False
 
     group_flags = ' '.join(list(map(lambda group: '-G {}'.format(group), groups)))
 
     CommandRunner.run('sudo usermod -a {} "$USER"'.format(group_flags))
+
+    return True
 
 
 def install_ohmyzsh():
@@ -189,7 +204,21 @@ def install_nvm():
     CommandRunner.run('curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash')
 
 
+def install_micro():
+    CommandRunner.run('(curl https://getmic.ro | bash) && sudo mv ./micro /usr/local/bin/micro')
+
+
+def install_jetbrains_toolbox():
+    jetbrains_dir = os.path.expanduser('~/jetbrains')
+    toolbox_link = 'https://data.services.jetbrains.com/products/download?platform=linux&code=TBA'
+    os.makedirs(jetbrains_dir, mode=0o755, exist_ok=True)
+
+    CommandRunner.run('curl \'{}\' | tar -xz -C "{}"'.format(toolbox_link, jetbrains_dir))
+
+
 def main():
+    CommandRunner.run('export DEBIAN_FRONTEND=noninteractive')
+
     args = get_args()
     apt = Apt(args)
     apt.update()
@@ -199,14 +228,16 @@ def main():
     repos = get_repos(args)
 
     for repo in repos:
-        apt.add_key(repo.gpg_key_location)
+        if repo.gpg_key_location is not None:
+            apt.add_key(repo.gpg_key_location)
+
         apt.add_repo(repo.repo)
 
     apt.update()
     apt.install(get_packages(args))
 
     change_shell()
-    add_groups(args)
+    should_reboot = add_groups(args)
 
     install_ohmyzsh()
 
@@ -216,6 +247,17 @@ def main():
         with open(zshrc_file, 'w') as f:
             f.write(get_zshrc(args))
             f.close()
+
+    if args.micro:
+        install_micro()
+
+    if args.jetbrains:
+        install_jetbrains_toolbox()
+
+    if should_reboot:
+        print('Done, please reboot')
+    else:
+        print('Done')
 
 
 if __name__ == '__main__':

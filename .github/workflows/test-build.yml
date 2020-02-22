@@ -20,5 +20,5 @@ jobs:
             - name: Switch to test user
               run: sudo su - testuser
             - name: Run the install script
-              run: wget -qO- https://raw.githubusercontent.com/RVxLab/ubuntu-setup/master/install.sh | bash -s - --with-nvm --with-docker --with-davfs2 --with-fonts --with-jetbrains-toolbox --with-keepassxc
+              run: bash "$GITHUB_WORKSPACE/install.sh" --nvm --docker --davfs --jetbrains --keepassxc --micro
       

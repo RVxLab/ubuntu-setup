@@ -10,7 +10,7 @@ jobs:
             - name: Update apt repo
               run: sudo apt-get update -yqq
             - name: Install needed stuff to run tests
-              run: sudo apt-get install -yqq lsb-release sudo
+              run: sudo apt-get install -yqq sudo python3
             - name: Set up test user
               run: |
                   sudo useradd -s /bin/bash -G sudo testuser
@@ -20,5 +20,5 @@ jobs:
             - name: Switch to test user
               run: sudo su - testuser
             - name: Run the install script
-              run: bash "$GITHUB_WORKSPACE/install.sh" --nvm --docker --davfs --jetbrains --keepassxc --micro
+              run: python3 "$GITHUB_WORKSPACE/setup.pu" --nvm --docker --davfs --jetbrains --keepassxc --micro
       

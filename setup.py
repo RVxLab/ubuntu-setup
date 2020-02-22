@@ -60,7 +60,7 @@ class Apt:
 
     def install(self, packages: List[AptPackage]):
         package_string = ' '.join(list(map(lambda package: package.get(), packages)))
-        command = 'sudo apt-get install {} {}'.format(self.verbose_flags, package_string)
+        command = 'sudo DEBIAN_FRONTEND=noninteractive apt-get install {} {}'.format(self.verbose_flags, package_string)
 
         self.run_command(command)
 

@@ -20,5 +20,5 @@ jobs:
             - name: Switch to test user
               run: sudo su - testuser
             - name: Run the install script
-              run: python3 "$GITHUB_WORKSPACE/setup.pu" --nvm --docker --davfs --jetbrains --keepassxc --micro
+              run: python3 "$GITHUB_WORKSPACE/setup.py" --nvm --docker --davfs --jetbrains --keepassxc --micro
       

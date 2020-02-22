@@ -211,14 +211,16 @@ def install_micro():
 def install_jetbrains_toolbox():
     jetbrains_dir = os.path.expanduser('~/jetbrains')
     toolbox_link = 'https://data.services.jetbrains.com/products/download?platform=linux&code=TBA'
+    toolbox_location = '{}/toolbox.tgz'.format(jetbrains_dir)
     os.makedirs(jetbrains_dir, mode=0o755, exist_ok=True)
 
-    CommandRunner.run('curl \'{}\' | tar -xz -C "{}"'.format(toolbox_link, jetbrains_dir))
+    CommandRunner.run('curl -o "{}" \'{}\''.format(toolbox_location, toolbox_link))
+    CommandRunner.run('tar -zx -f "{}" -C "{}"'.format(toolbox_location, jetbrains_dir))
+    
+    os.remove(toolbox_location)
 
 
 def main():
-    CommandRunner.run('export DEBIAN_FRONTEND=noninteractive')
-
     args = get_args()
     apt = Apt(args)
     apt.update()

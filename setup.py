@@ -201,11 +201,11 @@ source $ZSH/oh-my-zsh.sh
 
 
 def install_nvm():
-    CommandRunner.run('curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash')
+    CommandRunner.run('curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash')
 
 
 def install_micro():
-    CommandRunner.run('(curl https://getmic.ro | bash) && sudo mv ./micro /usr/local/bin/micro')
+    CommandRunner.run('(curl -fsSL https://getmic.ro | bash) && sudo mv ./micro /usr/local/bin/micro')
 
 
 def install_jetbrains_toolbox():
@@ -214,8 +214,7 @@ def install_jetbrains_toolbox():
     toolbox_location = '{}/toolbox.tgz'.format(jetbrains_dir)
     os.makedirs(jetbrains_dir, mode=0o755, exist_ok=True)
 
-    CommandRunner.run('curl -o "{}" \'{}\''.format(toolbox_location, toolbox_link))
-    CommandRunner.run('tar -zx -f "{}" -C "{}"'.format(toolbox_location, jetbrains_dir))
+    CommandRunner.run('curl -fsSL -o "{}" \'{}\' && tar -zx -f "{}" -C "{}"'.format(toolbox_location, toolbox_link, toolbox_location, jetbrains_dir))
     
     os.remove(toolbox_location)
 

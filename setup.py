@@ -115,6 +115,7 @@ def get_packages(args) -> List[AptPackage]:
     packages = {
         'zsh': True,
         'git': True,
+        'tilix': True,
         'docker-ce': args.docker,
         'docker-ce-cli': args.docker,
         'containerd.io': args.docker,

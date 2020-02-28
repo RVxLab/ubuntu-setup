@@ -8,5 +8,5 @@ then
     exit 1
 fi
 
-docker build -f "./Dockerfile-test-ubuntu18.04" .
-docker build -f "./Dockerfile-test-debian-buster" .
+docker build --no-cache -f "./Dockerfile-test-ubuntu18.04" .
+docker build --no-cache -f "./Dockerfile-test-debian-buster" .
